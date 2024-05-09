@@ -41,6 +41,22 @@ void setup() {
   tempsens.begin();
 }
 
+float get_stable_temp(float temp)
+{
+  if (prevTemp == -9999) {
+    prevTemp = 30;
+  }
+
+  if (abs(temp-prevTemp) > 10) {
+    // Re-use previous temp instead
+    Serial.println("Warning: temperature is not stable, check cable, reusing old temperature value...");
+    return prevTemp;
+  }
+
+    prevTemp = temp;
+    return temp;
+}
+
 long int calc_usonic_sensor_distance(long int duration)
 {
   return duration * 0.034 / 2;
@@ -62,12 +78,12 @@ void loop() {
 
   duration = pulseIn(US_SENS_ECHO, HIGH);
   distance = calc_usonic_sensor_distance(duration);
+  tempsens.requestTemperatures();
+  temp = get_stable_temp(tempsens.getTempCByIndex(0));
 
   Serial.print("distance=");
   Serial.print(distance);
 
-  tempsens.requestTemperatures();
-  temp = tempsens.getTempCByIndex(0);
   Serial.print("  temp=");
   Serial.print(temp);
   Serial.print("∘C\n");
