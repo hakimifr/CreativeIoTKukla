@@ -43,8 +43,17 @@ void setup() {
 
 float get_stable_temp(float temp)
 {
+  int calibrationTemp;
+
   if (prevTemp == -9999) {
-    prevTemp = 30;
+    tempsens.requestTemperatures();
+    calibrationTemp = tempsens.getTempCByIndex(0);
+
+    while (calibrationTemp == -127) {
+      Serial.println("Waiting for valid reading to calibrate");
+    }
+
+    prevTemp = calibrationTemp;
   }
 
   if (abs(temp-prevTemp) > 10) {
