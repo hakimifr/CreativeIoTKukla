@@ -14,6 +14,9 @@
 #define US_SENS_TRIG 6
 #define US_SENS_ECHO 7
 
+// Orientation bulb
+#define ORIENTATION_BULB 1
+
 // Buzzer
 #define BUZZER1_PIN 5
 
@@ -36,6 +39,7 @@ float logR2, R2, T;
 char ssid[] = WIFI_SSID;
 char password[] = WIFI_PASSWORD;
 
+bool orientation_ok;
 long int duration;
 long int distance;
 float temp, prevTemp = -9999;
@@ -47,6 +51,7 @@ void setup() {
   pinMode(MDRIVER_OUT2, OUTPUT);
   pinMode(US_SENS_ECHO, INPUT);
   pinMode(US_SENS_TRIG, OUTPUT);
+  pinMode(ORIENTATION_BULB, INPUT);
 
   Serial.begin(31250);
   while (!Serial);
@@ -64,7 +69,7 @@ void setup() {
     Serial.print("Trying to connect to wifi network: ");
     Serial.println(ssid);
     status = WiFi.begin(ssid, password);
-    delay(10000);
+    delay(3000);
 
     switch (status) {
       case WL_CONNECT_FAILED:
@@ -123,6 +128,14 @@ void send_sonic_burst()
 
 void loop() {
   send_sonic_burst();
+  orientation_ok = !digitalRead(ORIENTATION_BULB);
+
+  if (!orientation_ok) {
+    for (int i=0; i<5; i++) {
+      tone(BUZZER1_PIN, 2000, 50);
+      delay(100);
+    }
+  }
 
   duration = pulseIn(US_SENS_ECHO, HIGH);
   distance = calc_usonic_sensor_distance(duration);
