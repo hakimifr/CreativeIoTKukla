@@ -21,10 +21,10 @@
 #define ORIENTATION_BULB 1
 
 // Buzzer
-#define BUZZER1_PIN 5
+#define BUZZER1_PIN 8
 
-// dd
-#define T_SENS_PIN 4
+// Temp sensor
+#define T_SENS_PIN 9
 
 OneWire wire(T_SENS_PIN);
 DallasTemperature tempsens(&wire);
