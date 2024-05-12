@@ -7,10 +7,17 @@
 #include "wifi_secrets.h"
 #include "netutils.h"
 #include "servoutils.h"
+#include "mdriverutils.h"
 
 // Motor driver pins
 #define MDRIVER_OUT1 2
 #define MDRIVER_OUT2 3
+#define MDRIVER_OUT3 11
+#define MDRIVER_OUT4 12
+#define MDRIVER_ENA 5
+#define MDRIVER_ENB 4
+
+// Rudder Servo
 #define RUDDER_SERVO 0
 
 // Ultrasonic sensor pins
@@ -149,14 +156,12 @@ void loop() {
 
   if (distance < 20) {
     Serial.println("Obstacle detected, moving away!");
-    digitalWrite(MDRIVER_OUT1, LOW);
-    digitalWrite(MDRIVER_OUT2, HIGH);
+    start_motor(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA, 255);
     tone(BUZZER1_PIN, 2000, 500);
     servo_steerRight(&rudder_servo);
   } else {
-    digitalWrite(MDRIVER_OUT1, LOW);
-    digitalWrite(MDRIVER_OUT2, LOW);
     servo_resetpos(&rudder_servo);
+    halt_motor(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA);
   }
 }
 
