@@ -2,13 +2,16 @@
 #include <OneWire.h>
 #include <DallasTemperature.h>
 #include <WiFiNINA.h>
+#include <Servo.h>
 
 #include "wifi_secrets.h"
 #include "netutils.h"
+#include "servoutils.h"
 
 // Motor driver pins
 #define MDRIVER_OUT1 2
 #define MDRIVER_OUT2 3
+#define RUDDER_SERVO 0
 
 // Ultrasonic sensor pins
 #define US_SENS_TRIG 6
@@ -34,17 +37,22 @@ long int duration;
 long int distance;
 float temp, prevTemp = -9999;
 
+Servo rudder_servo;
+
 void setup() {
   int status = WL_IDLE_STATUS;
   int numberOfDevices;
   pinMode(MDRIVER_OUT1, OUTPUT);
   pinMode(MDRIVER_OUT2, OUTPUT);
+  pinMode(MDRIVER_ENA, OUTPUT);
   pinMode(US_SENS_ECHO, INPUT);
   pinMode(US_SENS_TRIG, OUTPUT);
   pinMode(ORIENTATION_BULB, INPUT);
 
-  Serial.begin(31250);
-  while (!Serial);
+  rudder_servo.attach(RUDDER_SERVO);
+  servo_resetpos(&rudder_servo);
+
+  Serial.begin(9600);
   tempsens.begin();
 
   if (WiFi.status() == WL_NO_MODULE)
@@ -144,9 +152,11 @@ void loop() {
     digitalWrite(MDRIVER_OUT1, LOW);
     digitalWrite(MDRIVER_OUT2, HIGH);
     tone(BUZZER1_PIN, 2000, 500);
+    servo_steerRight(&rudder_servo);
   } else {
     digitalWrite(MDRIVER_OUT1, LOW);
     digitalWrite(MDRIVER_OUT2, LOW);
+    servo_resetpos(&rudder_servo);
   }
 }
 
