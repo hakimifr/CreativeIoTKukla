@@ -154,6 +154,11 @@ void loop() {
   Serial.print(temp);
   Serial.print("∘C\n");
 
+  if (temp > 40)
+    Serial.println("Warning: Water temperature is too high, please re-position the submarine!");
+  else if (temp > 35)
+    Serial.println("Warning: Water temp is quite high...");
+
   if (distance < 20) {
     Serial.println("Obstacle detected, moving away!");
     start_motor(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA, 255);
