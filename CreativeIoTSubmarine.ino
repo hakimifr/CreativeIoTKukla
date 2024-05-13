@@ -8,6 +8,7 @@
 #include "netutils.h"
 #include "servoutils.h"
 #include "mdriverutils.h"
+#include "usonicSensUtils.h"
 
 // Motor driver pins
 #define MDRIVER_OUT1 2
@@ -51,7 +52,10 @@ void setup() {
   int numberOfDevices;
   pinMode(MDRIVER_OUT1, OUTPUT);
   pinMode(MDRIVER_OUT2, OUTPUT);
+  pinMode(MDRIVER_OUT3, OUTPUT);
+  pinMode(MDRIVER_OUT4, OUTPUT);
   pinMode(MDRIVER_ENA, OUTPUT);
+  pinMode(MDRIVER_ENB, OUTPUT);
   pinMode(US_SENS_ECHO, INPUT);
   pinMode(US_SENS_TRIG, OUTPUT);
   pinMode(ORIENTATION_BULB, INPUT);
@@ -115,24 +119,8 @@ float get_stable_temp(float temp)
     return temp;
 }
 
-long int calc_usonic_sensor_distance(long int duration)
-{
-  return duration * 0.034 / 2;
-}
-
-void send_sonic_burst()
-{
-  // Ensure the pin is cleared out
-  digitalWrite(US_SENS_TRIG, LOW);
-
-  // By sending 10us pulse
-  digitalWrite(US_SENS_TRIG, HIGH);
-  delayMicroseconds(10);
-  digitalWrite(US_SENS_TRIG, LOW);
-}
-
 void loop() {
-  send_sonic_burst();
+  send_sonic_burst(US_SENS_TRIG);
   orientation_ok = !digitalRead(ORIENTATION_BULB);
 
   if (!orientation_ok) {
