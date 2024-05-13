@@ -37,6 +37,9 @@
 OneWire wire(T_SENS_PIN);
 DallasTemperature tempsens(&wire);
 
+// Motors
+Motor thruster_updown_out12enA(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA);
+
 char ssid[] = WIFI_SSID;
 char password[] = WIFI_PASSWORD;
 
@@ -149,12 +152,12 @@ void loop() {
 
   if (distance < 20) {
     Serial.println("Obstacle detected, moving away!");
-    start_motor(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA, 255);
+    thruster_updown_out12enA.start_motor(50, true);
     tone(BUZZER1_PIN, 2000, 500);
     servo_steerRight(&rudder_servo);
   } else {
     servo_resetpos(&rudder_servo);
-    halt_motor(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA);
+    thruster_updown_out12enA.halt_motor();
   }
 }
 
