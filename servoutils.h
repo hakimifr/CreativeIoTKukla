@@ -2,28 +2,40 @@
 
 #define SERVO_OFFSET 30
 
-void servo_resetpos(Servo *servo)
-{
-    servo->write(0+SERVO_OFFSET);
-    delay(15);
-    servo->write(90+SERVO_OFFSET);
-    delay(15);
-}
+class HakimiServo {  // Can't name it servo 'cause it's already in Servo.h
+    private:
+    Servo *servo;
 
-void servo_steerRight(Servo *servo, bool resetpos=false)
-{
-    if (resetpos)
-        servo_resetpos(servo);
+    public:
+    HakimiServo(Servo *servoaddr, uint8_t pin)
+    {
+        servoaddr->attach(pin);
+        servo = servoaddr;
+    }
 
-    servo->write(180+SERVO_OFFSET);
-    delay(15);
-}
+    void servo_resetpos()
+    {
+        servo->write(0+SERVO_OFFSET);
+        delay(15);
+        servo->write(90+SERVO_OFFSET);
+        delay(15);
+    }
 
-void servo_steerLeft(Servo *servo, bool resetpos=false)
-{
-    if (resetpos)
-        servo_resetpos(servo);
+    void servo_steerRight(bool resetpos=false)
+    {
+        if (resetpos)
+            servo_resetpos();
 
-    servo->write(0+SERVO_OFFSET);
-    delay(15);
-}
+        servo->write(180+SERVO_OFFSET);
+        delay(15+SERVO_OFFSET);
+    }
+
+    void servo_steerLeft(bool resetpos=false)
+    {
+        if (resetpos)
+            servo_resetpos();
+
+        servo->write(0+SERVO_OFFSET);
+        delay(15);
+    }
+};

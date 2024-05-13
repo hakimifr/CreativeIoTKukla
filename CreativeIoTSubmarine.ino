@@ -49,7 +49,8 @@ long int duration;
 long int distance;
 float temp, prevTemp = -9999;
 
-Servo rudder_servo;
+Servo _rudder_servo;
+HakimiServo rudder_servo(&_rudder_servo, RUDDER_SERVO);
 
 void setup() {
   int status = WL_IDLE_STATUS;
@@ -64,8 +65,7 @@ void setup() {
   pinMode(US_SENS_TRIG, OUTPUT);
   pinMode(ORIENTATION_BULB, INPUT);
 
-  rudder_servo.attach(RUDDER_SERVO);
-  servo_resetpos(&rudder_servo);
+  rudder_servo.servo_resetpos();
 
   Serial.begin(9600);
   tempsens.begin();
@@ -163,9 +163,9 @@ void loop() {
     Serial.println("Obstacle detected, moving away!");
     thruster_updown_out12enA.start_motor(50, true);
     tone(BUZZER1_PIN, 2000, 500);
-    servo_steerRight(&rudder_servo);
+    rudder_servo.servo_steerRight();
   } else {
-    servo_resetpos(&rudder_servo);
+    rudder_servo.servo_steerLeft();
     thruster_updown_out12enA.halt_motor();
   }
 }
