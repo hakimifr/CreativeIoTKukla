@@ -39,6 +39,7 @@ DallasTemperature tempsens(&wire);
 
 // Motors
 Motor thruster_updown_out12enA(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA);
+Motor thruster_main_out34enB(MDRIVER_OUT3, MDRIVER_OUT4, MDRIVER_ENB);
 
 char ssid[] = WIFI_SSID;
 char password[] = WIFI_PASSWORD;
@@ -127,10 +128,17 @@ void loop() {
   orientation_ok = !digitalRead(ORIENTATION_BULB);
 
   if (!orientation_ok) {
+    if (thruster_main_out34enB.is_motor_running())
+      thruster_main_out34enB.halt_motor();
+
     for (int i=0; i<5; i++) {
       tone(BUZZER1_PIN, 2000, 50);
       delay(100);
     }
+  }
+
+  if (!thruster_main_out34enB.is_motor_running()) {
+    thruster_main_out34enB.start_motor(50);
   }
 
   duration = pulseIn(US_SENS_ECHO, HIGH);
