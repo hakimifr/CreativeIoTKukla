@@ -82,6 +82,7 @@ void setup() {
     Serial.print("Trying to connect to wifi network: ");
     Serial.println(ssid);
     status = WiFi.begin(ssid, password);
+    tone(BUZZER1_PIN, 2000, 1000);
     delay(3000);
 
     switch (status) {
