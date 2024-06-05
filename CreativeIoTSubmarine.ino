@@ -9,6 +9,7 @@
 #include "servoutils.h"
 #include "mdriverutils.h"
 #include "usonicSensUtils.h"
+#include "cloud.h"
 
 // Motor driver pins
 #define MDRIVER_OUT1 2
@@ -38,15 +39,15 @@ OneWire wire(T_SENS_PIN);
 DallasTemperature tempsens(&wire);
 
 // Motors
-Motor thruster_updown_out12enA(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA);
 Motor thruster_main_out34enB(MDRIVER_OUT3, MDRIVER_OUT4, MDRIVER_ENB);
+Motor cooling_fan(MDRIVER_OUT1, MDRIVER_OUT2, MDRIVER_ENA);
 
 char ssid[] = WIFI_SSID;
 char password[] = WIFI_PASSWORD;
 
 bool orientation_ok;
 long int duration;
-long int distance;
+long int distance, prevDistance;
 float temp, prevTemp = -9999;
 
 Servo _rudder_servo;
@@ -67,9 +68,10 @@ void setup() {
 
   rudder_servo.servo_resetpos();
 
-  Serial.begin(9600);
+  Serial.begin(115200);
   tempsens.begin();
 
+  // WiFi connections
   if (WiFi.status() == WL_NO_MODULE)
     Serial.println("Cannot detect wifi module!");
   else
@@ -93,10 +95,20 @@ void setup() {
         Serial.println("Connected successfully");
         break;
     }
+
+    // Arduino Cloud
+    ArduinoCloud.begin(iotPreferredCon);
+    ArduinoCloud.addProperty(temp, WRITE);
   }
 
   printCurrentNet();
   printWifiData();
+
+  // Never turn off this cooling fan, or the motor
+  // driver will get very hot! (melecur tangan 😌)
+  tone(BUZZER1_PIN, 2000, 1000);
+  cooling_fan.start_motor(255);
+  delay(5000);
 }
 
 float get_stable_temp(float temp)
@@ -125,8 +137,18 @@ float get_stable_temp(float temp)
 }
 
 void loop() {
+  ArduinoCloud.update();
   send_sonic_burst(US_SENS_TRIG);
+  duration = pulseIn(US_SENS_ECHO, HIGH);
+  distance = calc_usonic_sensor_distance(duration);
   orientation_ok = !digitalRead(ORIENTATION_BULB);
+  Serial.print("Orientation bulb value: ");
+  Serial.println(orientation_ok);
+
+  if (distance == 0)
+    distance = prevDistance;
+  else
+    prevDistance = distance;
 
   if (!orientation_ok) {
     if (thruster_main_out34enB.is_motor_running())
@@ -139,16 +161,15 @@ void loop() {
   }
 
   if (!thruster_main_out34enB.is_motor_running()) {
-    thruster_main_out34enB.start_motor(50);
+    thruster_main_out34enB.start_motor(128);
   }
 
-  duration = pulseIn(US_SENS_ECHO, HIGH);
-  distance = calc_usonic_sensor_distance(duration);
   tempsens.requestTemperatures();
   temp = get_stable_temp(tempsens.getTempCByIndex(0));
 
   Serial.print("distance=");
   Serial.print(distance);
+  Serial.print("cm");
 
   Serial.print("  temp=");
   Serial.print(temp);
@@ -161,12 +182,9 @@ void loop() {
 
   if (distance < 20) {
     Serial.println("Obstacle detected, moving away!");
-    thruster_updown_out12enA.start_motor(50, true);
     tone(BUZZER1_PIN, 2000, 500);
     rudder_servo.servo_steerRight();
   } else {
     rudder_servo.servo_steerLeft();
-    thruster_updown_out12enA.halt_motor();
   }
 }
-
