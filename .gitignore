@@ -1,2 +1,4 @@
 wifi_secrets.h
+cloud_secret.h
 .vscode/
+build/

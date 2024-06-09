@@ -52,3 +52,12 @@ void printCurrentNet() {
   Serial.println(encryption, HEX);
   Serial.println();
 }
+
+void print_net_status()
+{
+  switch (WiFi.status()) {
+    case WL_DISCONNECTED:
+    case WL_AP_FAILED:
+      Serial.println("WiFi is not connected!");
+  }
+}

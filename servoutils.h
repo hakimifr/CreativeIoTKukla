@@ -5,7 +5,7 @@
 class HakimiServo {  // Can't name it servo 'cause it's already in Servo.h
     private:
     Servo *servo;
-    char last_pos = 'X';  // (M)iddle, (L)eft, (R)ight
+    char last_pos = 'M';  // (M)iddle, (L)eft, (R)ight
 
     public:
     HakimiServo(Servo *servoaddr, uint8_t pin)

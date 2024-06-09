@@ -8,10 +8,14 @@ class Motor {
 
     public:
     Motor(uint8_t motor_outx, uint8_t motor_outy, uint8_t motor_enx) {
-        outx = motor_outx;
-        outy = motor_outy;
+        outy = motor_outx;
+        outx = motor_outy;
         enx = motor_enx;
         motor_running = false;
+
+        pinMode(motor_enx, OUTPUT);
+        pinMode(motor_outx, OUTPUT);
+        pinMode(motor_outy, OUTPUT);
     }
 
     void start_motor(uint8_t speed, bool inverse = false)
@@ -24,6 +28,11 @@ class Motor {
             return;
         }
 
+        Serial.print("Writing ");
+        Serial.print(speed);
+        Serial.print(" to pin ");
+        Serial.println(enx);
+
         if (inverse) {
             tmpOutx = outy;
             tmpOuty = outx;
@@ -32,9 +41,12 @@ class Motor {
             tmpOuty = outy;
         }
 
+        Serial.println(tmpOutx);
+        Serial.println(tmpOuty);
+
         analogWrite(enx, speed);
-        digitalWrite(outx, HIGH);
-        digitalWrite(outy, LOW);
+        digitalWrite(tmpOutx, 1);
+        digitalWrite(tmpOuty, 0);
         motor_running = true;
         current_running_speed = speed;
 
@@ -47,8 +59,8 @@ class Motor {
             return;
         }
 
-        digitalWrite(outx, LOW);
-        digitalWrite(outy, LOW);
+        digitalWrite(outx, 0);
+        digitalWrite(outy, 0);
         motor_running = false;
     }
 
